@@ -16,13 +16,17 @@ export default function App() {
   const [repositories, setRepositories] = useState([])
 
   useEffect(() => {
-    api.get('/repositories').then(response => {
-      setRepositories(response.data)
-    })
+    api.get('/repositories').then(response => setRepositories(response.data))
   }, [])
 
   async function handleLikeRepository(id) {
-    // api.post(`repositories/${id}/likes`)
+    api.post(`repositories/${id}/like`).then(response => {
+      const likedRepoIndex = repositories.findIndex(repo => repo.id === id)
+      const filteredRepos = repositories.filter(repo => repo.id !== id)
+
+      filteredRepos.splice(likedRepoIndex, 0, response.data)
+      setRepositories(filteredRepos)
+    })
   }
 
   return (
@@ -52,18 +56,16 @@ export default function App() {
               <View style={styles.likesContainer}>
                 <Text
                   style={styles.likeText}
-                  // Remember to replace "1" below with repository ID: {`repository-likes-${repository.id}`}
-                  testID={`repository-likes-1`}
+                  testID={`repository-likes-${repo.id}`}
                 >
-                  3 curtidas
+                  {`${repo.likes} curtida${repo.likes > 1 ? 's' : ''}`}
                 </Text>
               </View>
 
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => handleLikeRepository(1)}
-                // Remember to replace "1" below with repository ID: {`like-button-${repository.id}`}
-                testID={`like-button-1`}
+                onPress={() => handleLikeRepository(repo.id)}
+                testID={`like-button-${repo.id}`}
               >
                 <Text style={styles.buttonText}>Curtir</Text>
               </TouchableOpacity>
